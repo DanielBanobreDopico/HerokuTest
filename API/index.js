@@ -1,6 +1,8 @@
 /**
  * Importando módulos.
  */
+const {Storage} = require('@google-cloud/storage'); //Driver de Google Cloud para acceso a Firebase Storage
+const serviceAccount = require('./test-f624c-firebase-adminsdk-zwi4k-ee2aaaaab6.json'); //Credenciales para Firebase Admin. Obtenidas en "Cuentas de servicio" en la configuración del proyecto de Firebase.
 const express = require('express');
 const multer  = require('multer');
 const cors = require('cors');
@@ -12,7 +14,19 @@ const PORT = process.env.PORT || 3000;
 const mimeParser = multer();
 
 /**
+ * Inicializando acceso a Firebase Storage.
+ * Firebase Storage nos permite almacenar ficheros en la nube de Google.
+ */
+
+const storage = new Storage({
+    projectId: 'test-f624c',
+    keyFilename: './test-f624c-firebase-adminsdk-zwi4k-ee2aaaaab6.json',
+  });
+const storageRoot = storage.bucket('test-f624c.appspot.com');
+
+/**
  * Accediendo a MongoDB y apuntando a una colección.
+ * MongoDB es una base de datos NoSQL orientada a documentos en la que podemos almacenar y recuperar objetos con sus atributos -sin métodos-.
  */
 var mongoDB
 var testingCollection
@@ -22,8 +36,7 @@ mongoClient.connect()
         client=>{
             mongoDB = client.db();
             testingCollection = mongoDB.collection('tests');
-            console.log('mongoClient:', client);
-            console.log('mongoDB:', mongoDB);
+            console.log('Conected to Mongo Atlas');
         }
     ).catch(
         err=>{
@@ -75,3 +88,15 @@ app.get('/quote/', async (req,res)=>{
 app.listen( PORT , ()=>{
     console.log(`Listo!: servicio preparado para recibir peticiones.`);
 });
+
+/**
+ * Pruebas con Storage
+ */
+
+async function getMetadata() {
+    await storageRoot.file('uploads/images.jpeg').makePublic();
+    const [metadata] = await storageRoot.file('uploads/images.jpeg').getMetadata();
+    console.log('URL': metadata.mediaLink);
+}
+
+getMetadata();
