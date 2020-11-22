@@ -42,6 +42,7 @@
 		<form  action="javascript:;" on:submit={submitForm} bind:this={htmlForm}>
 			<input type="text" name="quote" placeholder="New quote...">
 			<input type="text" name="author" placeholder="Quote author...">
+			<input type="file" name="image">
 			<input type="submit"> 
 		</form>
 	</div>

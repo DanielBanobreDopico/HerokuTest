@@ -6,12 +6,14 @@ const serviceAccount = require('./test-f624c-firebase-adminsdk-zwi4k-ee2aaaaab6.
 const express = require('express');
 const multer  = require('multer');
 const cors = require('cors');
+const tmp = require('tmp');
 
 /**
  * Inicializando variables.
  */
 const PORT = process.env.PORT || 3000;
-const mimeParser = multer();
+const tmpDir = tmp.dirSync().name; //Creamos un directorio temporal único para la app.
+const mimeParser = multer( { dest: tmpDir } ); //Especificamos directorio temporal para subir ficheros.
 
 /**
  * Inicializando acceso a Firebase Storage.
@@ -22,7 +24,7 @@ const storage = new Storage({
     projectId: 'test-f624c',
     keyFilename: './test-f624c-firebase-adminsdk-zwi4k-ee2aaaaab6.json',
   });
-const storageRoot = storage.bucket('test-f624c.appspot.com');
+const storageRoot = storage.bucket('test-f624c.appspot.com'); // El "bucket" corresponder con la ruta del Storage de nuestro proyecto en Firebase.
 
 /**
  * Accediendo a MongoDB y apuntando a una colección.
@@ -56,11 +58,18 @@ app.use(express.static(__dirname + '/public'));
  * End points.
  */
 
-app.post('/quote/', mimeParser.none(), async (req,res)=>{
+app.post('/quote/', mimeParser.single('image'), async (req,res)=>{
     try {
+        const image = req.file;
+        const upload = await storageRoot.upload(image.path); // Se inicia la subida del fichero a Firebase Storage.
+        const file = upload[0];
+        await file.makePublic()
+        file.publicUrl().then(cosa=>console.log(cosa))
+
         const quoteDocument = {
             quote: req.body.quote,
             author: req.body.author,
+            image,
         };
         testingCollection.insertOne(quoteDocument);
         console.log('-> New quote')
@@ -96,7 +105,7 @@ app.listen( PORT , ()=>{
 async function getMetadata() {
     await storageRoot.file('uploads/images.jpeg').makePublic();
     const [metadata] = await storageRoot.file('uploads/images.jpeg').getMetadata();
-    console.log('URL': metadata.mediaLink);
+    console.log('URL:', metadata.mediaLink);
 }
 
-getMetadata();
+//getMetadata();
