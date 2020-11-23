@@ -62,14 +62,16 @@ app.post('/quote/', mimeParser.single('image'), async (req,res)=>{
     try {
         const image = req.file;
         const upload = await storageRoot.upload(image.path); // Se inicia la subida del fichero a Firebase Storage.
-        const file = upload[0];
-        await file.makePublic()
-        file.publicUrl().then(cosa=>console.log(cosa))
+        const file = upload[0]; //El elemento 0 del array es el fichero en la nube.
+        await file.makePublic() //Concedemos acceso anónimo al fichero desde Internet.
+        const meta = await file.getMetadata(); //Obtenemos la información sobre el fichero.
+        const imgURL = meta[0].mediaLink; //Obtenemos el enlace para el acceso público al fichero.
 
         const quoteDocument = {
             quote: req.body.quote,
             author: req.body.author,
-            image,
+            image, //Incluimos en la base de datos toda la información sobre el fichero para poder recuperarlo en el futuro.
+            imgURL,
         };
         testingCollection.insertOne(quoteDocument);
         console.log('-> New quote')
