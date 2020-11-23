@@ -2,7 +2,7 @@
  * Importando módulos.
  */
 const {Storage} = require('@google-cloud/storage'); //Driver de Google Cloud para acceso a Firebase Storage
-const serviceAccount = require('./test-f624c-firebase-adminsdk-zwi4k-ee2aaaaab6.json'); //Credenciales para Firebase Admin. Obtenidas en "Cuentas de servicio" en la configuración del proyecto de Firebase.
+//const serviceAccount = require('./test-f624c-firebase-adminsdk-zwi4k-ee2aaaaab6.json'); //Credenciales para Firebase Admin. Obtenidas en "Cuentas de servicio" en la configuración del proyecto de Firebase.
 const express = require('express');
 const multer  = require('multer');
 const cors = require('cors');
